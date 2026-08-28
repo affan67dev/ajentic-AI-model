@@ -1,0 +1,12 @@
+import os
+import telebot
+
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
+bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
+
+@bot.message_handler(func=lambda message: True)
+def handle_message(message):
+    bot.reply_to(message, f"Sahi chal raha hai! Aapne likha: {message.text}")
+
+print("Bot chal pada hai...")
+bot.infinity_polling()
