@@ -1,0 +1,4 @@
+python-telegram-bot==21.6
+groq==0.11.0
+pinecone==5.0.1
+gradio==4.44.1

@@ -1,8 +1,11 @@
-import os
+import logging
 from groq import Groq
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filters
 import config
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 # Initialize Groq Client
 client = Groq(api_key=config.GROQ_API_KEY)
@@ -11,7 +14,8 @@ client = Groq(api_key=config.GROQ_API_KEY)
 try:
     with open("system_instructions.txt", "r", encoding="utf-8") as f:
         system_prompt = f.read()
-except Exception:
+except OSError as e:
+    logger.warning("Could not load system_instructions.txt: %s. Using default prompt.", e)
     system_prompt = "You are a helpful AI assistant."
 
 # Global dictionary to store chat history for each user
@@ -46,8 +50,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         await update.message.reply_text(reply_text)
         
-    except Exception as e:
-        await update.message.reply_text(f"Oops! Koi error aaya: {e}")
+    except Exception:
+        logger.exception("Failed to generate AI response for chat_id=%s", chat_id)
+        await update.message.reply_text("Sorry, something went wrong. Please try again in a moment.")
 
 def run_bot():
     app = ApplicationBuilder().token(config.TELEGRAM_TOKEN).build()
