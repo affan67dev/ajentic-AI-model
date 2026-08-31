@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'OMNI BRAIN — Your AI, unified',
+  title: 'Zexio AI — Your AI, unified',
   description: 'A premium AI workspace for better thinking.',
 }
 

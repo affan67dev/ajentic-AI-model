@@ -1,7 +1,7 @@
 import gradio as gr
 
 def predict(message, history):
-    return "Main OMNI BRAIN AI hoon 🧠\n\nAapka message mil gaya hai. Main aapki help ke liye ready hoon!"
+    return "Main Zexio AI hoon 🧠\n\nAapka message mil gaya hai. Main aapki help ke liye ready hoon!"
 
 css = """
 body { background:#030914 !important; }
@@ -14,17 +14,17 @@ textarea { background:#0b1424 !important; color:white !important; border:1px sol
 button { border-radius:20px !important; }
 """
 
-with gr.Blocks(css=css, title="OMNI BRAIN AI") as demo:
+with gr.Blocks(css=css, title="Zexio AI AI") as demo:
     gr.HTML("""
     <div id="header">
-        <div id="logo">🧠 OMNI BRAIN AI</div>
+        <div id="logo">🧠 Zexio AI AI</div>
         <div id="status">Your Personal AI Assistant <span style="color:#00ff88">●</span></div>
     </div>
     """)
     
     gr.Markdown(
         "<h1 style='text-align:center;margin-top:45px'>How can I <span style='color:#00d9ff'>help</span> you today?</h1>"
-        "<p style='text-align:center;color:#8d99aa'>Ask anything. OMNI BRAIN is ready.</p>"
+        "<p style='text-align:center;color:#8d99aa'>Ask anything. Zexio AI is ready.</p>"
     )
     
     chatbot = gr.Chatbot(
@@ -37,7 +37,7 @@ with gr.Blocks(css=css, title="OMNI BRAIN AI") as demo:
     
     with gr.Row():
         msg = gr.Textbox(
-            placeholder="Message OMNI BRAIN...",
+            placeholder="Message Zexio AI...",
             show_label=False,
             scale=8,
             lines=1

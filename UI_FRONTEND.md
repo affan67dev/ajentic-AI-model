@@ -1,7 +1,7 @@
-# OmniBrain Frontend UI
+# Zexio AI Frontend UI
 
 ## Structure
-- `app/page.tsx` contains the client chat shell, sidebar history, unified OmniBrain header, transcript, composer, model control, and floating app navigation.
+- `app/page.tsx` contains the client chat shell, sidebar history, unified Zexio AI header, transcript, composer, model control, and floating app navigation.
 - `app/globals.css` owns the dark glass visual system, responsive layout, message action styling, composer layout, and compact navigation capsule.
 
 ## Design rules
@@ -11,7 +11,7 @@
 - The composer stays below the transcript, keeps attachment on the left, voice and send on the right, and places the disclaimer beneath it.
 
 ## Chat behavior
-- Sending adds a user message and a generic OmniBrain response.
+- Sending adds a user message and a generic Zexio AI response.
 - Markdown-like headings, bullets, numbered lines, inline code, links, and fenced code blocks must remain readable and horizontally safe.
 - Processing uses a generic `Thinking…` status and never exposes a backend model.
 
