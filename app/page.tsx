@@ -1,66 +1,43 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { ArrowUp, AudioLines, Bot, Check, ChevronDown, Command, FileUp, Menu, MoreHorizontal, Plus, Search, Settings2, Sparkles, X, Zap } from 'lucide-react'
+import { ArrowUp, AudioLines, Bot, Check, ChevronDown, FileUp, Lock, Menu, MoreHorizontal, Plus, Search, Settings2, Share2, Sparkles, X } from 'lucide-react'
 
-const models = [
-  { name: 'Llama 3', detail: 'Meta · 70B', color: 'model-blue' },
-  { name: 'Gemini', detail: 'Google · 1.5 Pro', color: 'model-green' },
-  { name: 'Claude', detail: 'Anthropic · 3.5 Sonnet', color: 'model-orange' },
-  { name: 'GPT', detail: 'OpenAI · 4o', color: 'model-lilac' },
-  { name: 'Mistral', detail: 'Mistral AI · Large', color: 'model-rose' },
+type Model = { name: string; description: string; tone: string; locked?: boolean }
+type Message = { role: 'user' | 'assistant'; content: string; time: string; model?: string }
+
+const models: Model[] = [
+  { name: 'OmniBrain Auto', description: 'Routes every request to the right intelligence', tone: 'auto' },
+  { name: 'GPT-4o', description: 'Balanced intelligence and reasoning', tone: 'blue', locked: true },
+  { name: 'Claude', description: 'Deep reasoning and long-form analysis', tone: 'gold', locked: true },
+  { name: 'Gemini Flash', description: 'Fast responses and multimodal processing', tone: 'green', locked: true },
+  { name: 'Llama 3', description: 'Open-source intelligence', tone: 'violet', locked: true },
+  { name: 'Mistral', description: 'Efficient, precise assistance', tone: 'rose', locked: true },
 ]
-
-type Message = { role: 'user' | 'assistant'; content: string; time: string }
-
+const history = { Today: ['AI launch strategy', 'Product positioning notes', 'Marketing campaign ideas'], Yesterday: ['Startup business plan', 'Website architecture'], 'This week': ['Future of artificial intelligence', 'Mobile application roadmap'], Older: ['Previous conversations'] }
 const seedMessages: Message[] = [
   { role: 'user', content: 'Help me map out a launch strategy for a new AI productivity tool.', time: '09:41 AM' },
-  { role: 'assistant', content: 'Absolutely. Let’s build a focused launch system around three pillars: positioning, distribution, and momentum.', time: '09:41 AM' },
-  { role: 'assistant', content: '### The core narrative\n\nPosition your product as the calm, intelligent layer between people and their work — not another tool to manage.\n\n- **Lead with the outcome:** reclaim focused time\n- **Show the magic:** one prompt → a finished workflow\n- **Build trust:** transparent, human-first AI\n\n```\nlaunch_theme = "Work, elevated."\nprimary_metric = "activated_workspaces"\n```', time: '09:42 AM' },
+  { role: 'assistant', content: 'Absolutely. Let’s build a focused launch system around three pillars: positioning, distribution, and momentum.', time: '09:41 AM', model: 'GPT-4o' },
+  { role: 'assistant', content: '### The core narrative\n\nPosition your product as the calm, intelligent layer between people and their work — not another tool to manage.\n\n- **Lead with the outcome:** reclaim focused time\n- **Show the magic:** one prompt → a finished workflow\n- **Build trust:** transparent, human-first AI', time: '09:42 AM', model: 'GPT-4o' },
 ]
 
+function ModelGlyph({ tone = 'auto' }: { tone?: string }) { return <span className={`model-glyph glyph-${tone}`}><Sparkles size={14} /></span> }
+
 export default function Home() {
-  const [activeModel, setActiveModel] = useState(models[3])
-  const [messages, setMessages] = useState(seedMessages)
-  const [input, setInput] = useState('')
-  const [isTyping, setIsTyping] = useState(false)
-  const [drawerOpen, setDrawerOpen] = useState(false)
-  const [search, setSearch] = useState('')
-  const filteredChats = useMemo(() => ['AI launch strategy', 'Product positioning notes', 'Q3 growth experiments'].filter((chat) => chat.toLowerCase().includes(search.toLowerCase())), [search])
-
-  function sendMessage() {
-    const text = input.trim()
-    if (!text || isTyping) return
-    setMessages((current) => [...current, { role: 'user', content: text, time: 'Now' }])
-    setInput('')
-    setIsTyping(true)
-    window.setTimeout(() => {
-      setMessages((current) => [...current, { role: 'assistant', content: `Here’s a clear way to think about that through ${activeModel.name}: start with the highest-leverage decision, define the signal you want to create, then turn it into one focused next step.`, time: 'Now' }])
-      setIsTyping(false)
-    }, 900)
-  }
-
-  function newChat() { setMessages([]); setInput(''); setDrawerOpen(false) }
-
-  return <main className="app-shell">
-    <div className="ambient ambient-one" /><div className="ambient ambient-two" />
-    <aside className={`sidebar ${drawerOpen ? 'sidebar-open' : ''}`}>
-      <div className="sidebar-inner">
-        <div className="brand-row"><div className="brand-mark"><Sparkles size={17} /></div><span>OMNI<span className="brand-muted">BRAIN</span></span><button className="mobile-close" onClick={() => setDrawerOpen(false)} aria-label="Close navigation"><X size={18} /></button></div>
-        <button className="new-chat" onClick={newChat}><Plus size={17} /> New chat <span className="shortcut">⌘ K</span></button>
-        <label className="search-box"><Search size={15} /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search conversations" /><span>⌘ /</span></label>
-        <div className="section-label">Models <span>5 online</span></div>
-        <div className="model-list">{models.map((model) => <button className={`model-item ${activeModel.name === model.name ? 'model-active' : ''}`} key={model.name} onClick={() => { setActiveModel(model); setDrawerOpen(false) }}><span className={`model-icon ${model.color}`}><Bot size={16} /></span><span className="model-copy"><strong>{model.name}</strong><small>{model.detail}</small></span><i className="online-dot" />{activeModel.name === model.name && <Check size={14} className="model-check" />}</button>)}</div>
-        <div className="section-label recent-label">Recent <span><MoreHorizontal size={16} /></span></div>
-        <div className="recent-list">{filteredChats.map((chat, index) => <button className={`recent-chat ${index === 0 ? 'recent-active' : ''}`} key={chat}><span className="recent-dot" /><span>{chat}</span><small>{index === 0 ? 'Now' : `${index + 1}h`}</small></button>)}</div>
-        <div className="sidebar-bottom"><button className="side-action"><Settings2 size={17} /> Settings</button><div className="profile"><div className="avatar">AK</div><div><strong>Alex Kim</strong><small>Pro workspace</small></div><MoreHorizontal size={17} /></div></div>
-      </div>
-    </aside>
-    {drawerOpen && <button className="drawer-backdrop" onClick={() => setDrawerOpen(false)} aria-label="Close menu" />}
-    <section className="workspace">
-      <header className="topbar"><button className="mobile-menu" onClick={() => setDrawerOpen(true)} aria-label="Open navigation"><Menu size={20} /></button><div className="current-model"><span className={`model-icon ${activeModel.color}`}><Bot size={16} /></span><div><strong>{activeModel.name}</strong><span>Balanced reasoning</span></div><ChevronDown size={15} /></div><div className="topbar-actions"><span className="ai-status"><i /> AI online</span><button className="icon-btn" aria-label="Command menu"><Command size={17} /></button><button className="icon-btn" aria-label="More actions"><MoreHorizontal size={19} /></button></div></header>
-      <div className="chat-scroll"><div className="chat-content">{messages.length === 0 && <div className="empty-state"><div className="empty-icon"><Sparkles size={23} /></div><p className="eyebrow">A workspace for better thinking</p><h1>What will we<br /><span>create today?</span></h1><p className="empty-copy">Ask anything, explore ideas, or turn a blank page into momentum.</p></div>}{messages.length > 0 && <div className="conversation"><div className="conversation-date"><span>Today, August 31</span></div>{messages.map((message, index) => <article className={`message-row ${message.role}`} key={`${message.time}-${index}`}><div className="message-avatar">{message.role === 'assistant' ? <Sparkles size={15} /> : 'AK'}</div><div className="message-body"><div className="message-meta"><strong>{message.role === 'assistant' ? activeModel.name : 'You'}</strong><span>{message.time}</span></div><div className={`message-bubble ${message.role}`}>{message.content.split('\n').map((line, i) => <p key={i} className={line.startsWith('###') ? 'message-heading' : line.startsWith('- ') ? 'bullet-line' : line.startsWith('```') ? 'code-line' : ''}>{line.startsWith('### ') ? line.slice(4) : line.startsWith('- ') ? line.slice(2) : line}</p>)}</div>{message.role === 'assistant' && index === 2 && <div className="message-tools"><button>Copy</button><button>Regenerate</button></div>}</div></article>)}{isTyping && <div className="message-row assistant"><div className="message-avatar"><Sparkles size={15} /></div><div className="message-body"><div className="message-meta"><strong>{activeModel.name}</strong><span>Thinking</span></div><div className="typing-bubble"><i /><i /><i /></div></div></div>}</div>}</div></div>
-      <div className="composer-wrap"><div className="composer"><textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing && e.keyCode !== 229) { e.preventDefault(); sendMessage() } }} placeholder="Message your AI..." rows={1} /><div className="composer-footer"><div className="composer-tools"><button aria-label="Attach file"><FileUp size={18} /></button><button aria-label="Voice input"><AudioLines size={18} /></button><span>Shift + Enter for new line</span></div><button className={`send-btn ${input.trim() ? 'send-active' : ''}`} onClick={sendMessage} aria-label="Send message"><ArrowUp size={18} /></button></div></div><div className="composer-note"><Zap size={12} /> OmniBrain can make mistakes. Check important info.</div></div>
+  const [selected, setSelected] = useState(models[0]); const [messages, setMessages] = useState(seedMessages); const [input, setInput] = useState(''); const [search, setSearch] = useState(''); const [drawer, setDrawer] = useState(false); const [modelOpen, setModelOpen] = useState(false); const [upgrade, setUpgrade] = useState(false); const [typing, setTyping] = useState(false)
+  const filtered = useMemo(() => Object.fromEntries(Object.entries(history).map(([group, chats]) => [group, chats.filter((chat) => chat.toLowerCase().includes(search.toLowerCase()))])), [search])
+  const send = () => { const text = input.trim(); if (!text || typing) return; setMessages((m) => [...m, { role: 'user', content: text, time: 'Now' }]); setInput(''); setTyping(true); window.setTimeout(() => { setMessages((m) => [...m, { role: 'assistant', content: 'Here is a focused way to approach that: clarify the outcome, identify the highest-leverage decision, and turn it into one concrete next step.', time: 'Now', model: 'GPT-4o' }]); setTyping(false) }, 900) }
+  const newChat = () => { setMessages([]); setInput(''); setDrawer(false) }
+  return <main className="app-shell"><div className="ambient ambient-one" /><div className="ambient ambient-two" />
+    <aside className={`sidebar ${drawer ? 'sidebar-open' : ''}`}><div className="sidebar-inner"><div className="brand-row"><div className="brand-mark"><Sparkles size={16} /></div><span>OMNI<span className="brand-muted">BRAIN</span></span><button className="mobile-close" onClick={() => setDrawer(false)} aria-label="Close navigation"><X size={18} /></button></div>
+      <button className="new-chat" onClick={newChat}><Plus size={16} /> New chat <span className="shortcut">⌘ K</span></button><label className="search-box"><Search size={15} /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search conversations" /><span>⌘ /</span></label>
+      <div className="history-scroll">{Object.entries(filtered).map(([group, chats]) => chats.length > 0 && <section className="history-group" key={group}><div className="section-label">{group}</div>{chats.map((chat, i) => <button key={chat} className={`conversation-item ${chat === 'AI launch strategy' ? 'conversation-active' : ''}`} onClick={() => setDrawer(false)}><span className="conversation-dot" /><span className="truncate">{chat}</span>{i === 0 && group === 'Today' ? <small>Now</small> : null}</button>)}</section>)}</div>
+      <div className="sidebar-bottom"><button className="side-action"><Settings2 size={16} /> Settings</button><div className="profile"><div className="avatar">AK</div><div><strong>Alex Kim</strong><small>Free plan</small></div><MoreHorizontal size={16} /></div></div></div></aside>{drawer && <button className="drawer-backdrop" onClick={() => setDrawer(false)} aria-label="Close menu" />}
+    <section className="workspace"><header className="topbar"><button className="mobile-menu" onClick={() => setDrawer(true)} aria-label="Open navigation"><Menu size={20} /></button><div className="chat-title"><strong>AI launch strategy</strong><span>Updated just now</span></div><button className="intelligence-trigger" onClick={() => setModelOpen(true)}><ModelGlyph tone={selected.tone} /><span>{selected.name}</span><ChevronDown size={14} /></button><div className="topbar-actions"><span className="ai-status"><i /> Online</span><button className="icon-btn" aria-label="Share conversation"><Share2 size={16} /></button><button className="icon-btn" aria-label="More actions"><MoreHorizontal size={18} /></button></div></header>
+      <div className="chat-scroll"><div className="chat-content">{messages.length === 0 ? <div className="empty-state"><div className="empty-icon"><Sparkles size={22} /></div><p className="eyebrow">Your intelligence, amplified</p><h1>How can OmniBrain<br /><span>help you today?</span></h1><p className="empty-copy">Ask questions, explore ideas, analyze information, and let OmniBrain connect you with the right intelligence.</p><div className="suggestions">{['Help me build a startup strategy', 'Explain a complex idea', 'Analyze this document', 'Create a business roadmap'].map((s) => <button key={s} onClick={() => setInput(s)}>{s}</button>)}</div></div> : <div className="conversation"><div className="conversation-date"><span>Today, August 31</span></div>{messages.map((m, i) => <article className={`message-row ${m.role}`} key={`${m.time}-${i}`}><div className="message-avatar">{m.role === 'assistant' ? <Sparkles size={14} /> : 'AK'}</div><div className="message-body"><div className="message-meta"><strong>{m.role === 'assistant' ? 'OmniBrain' : 'You'}</strong><span>{m.time}</span>{m.role === 'assistant' && <em><ModelGlyph tone="blue" />{m.model ?? 'GPT-4o'}</em>}</div><div className={`message-content ${m.role}`}>{m.content.split('\n').map((line, j) => <p key={j} className={line.startsWith('###') ? 'message-heading' : line.startsWith('- ') ? 'bullet-line' : ''}>{line.startsWith('### ') ? line.slice(4) : line.startsWith('- ') ? line.slice(2) : line || '\u00a0'}</p>)}</div></div></article>)}{typing && <div className="message-row assistant"><div className="message-avatar"><Sparkles size={14} /></div><div className="message-body"><div className="message-meta"><strong>OmniBrain</strong><span>Thinking</span></div><div className="typing"><i /><i /><i /></div></div></div>}</div>}</div></div>
+      <div className="composer-wrap"><div className="composer"><textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing && e.keyCode !== 229) { e.preventDefault(); send() } }} placeholder="Ask OmniBrain anything..." rows={1} /><div className="composer-footer"><div className="composer-tools"><button aria-label="Attach file"><FileUp size={17} /></button><button aria-label="Voice input"><AudioLines size={17} /></button><span>OmniBrain can make mistakes. Check important info.</span></div><button className={`send-btn ${input.trim() ? 'send-active' : ''}`} onClick={send} aria-label="Send message"><ArrowUp size={17} /></button></div></div></div>
     </section>
+    {modelOpen && <div className="modal-backdrop" onClick={() => setModelOpen(false)}><section className="model-modal" onClick={(e) => e.stopPropagation()}><div className="modal-heading"><div><p className="eyebrow">Intelligence layer</p><h2>Choose your mode</h2><p>OmniBrain Auto selects the right intelligence for every request.</p></div><button className="icon-btn" onClick={() => setModelOpen(false)} aria-label="Close model selector"><X size={18} /></button></div><div className="model-options">{models.map((model) => <button key={model.name} className={`model-option ${selected.name === model.name ? 'model-selected' : ''} ${model.locked ? 'model-locked' : ''}`} onClick={() => model.locked ? setUpgrade(true) : (setSelected(model), setModelOpen(false))}><ModelGlyph tone={model.tone} /><span className="model-option-copy"><strong>{model.name}</strong><small>{model.description}</small></span>{model.locked ? <><span className="premium-label">Premium</span><Lock size={14} /></> : <Check size={16} className={selected.name === model.name ? 'visible' : ''} />}</button>)}</div></section></div>}
+    {upgrade && <div className="modal-backdrop" onClick={() => setUpgrade(false)}><section className="upgrade-modal" onClick={(e) => e.stopPropagation()}><button className="modal-x" onClick={() => setUpgrade(false)} aria-label="Close upgrade dialog"><X size={18} /></button><div className="upgrade-icon"><Sparkles size={20} /></div><p className="eyebrow">OmniBrain Pro</p><h2>Unlock the full intelligence of OmniBrain</h2><p>Access multiple world-class AI models and choose the right intelligence for every task.</p><button className="upgrade-button" onClick={() => setUpgrade(false)}>Upgrade to OmniBrain Pro</button></section></div>}
   </main>
 }
