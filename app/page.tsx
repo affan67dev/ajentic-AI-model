@@ -71,6 +71,7 @@ export default function Home() {
   const [attachment, setAttachment] = useState<Attachment | null>(null)
   const [linkDraft, setLinkDraft] = useState('')
   const [linkMode, setLinkMode] = useState(false)
+  const mediaStreamRef = useRef<MediaStream | null>(null)
   const [isRecording, setIsRecording] = useState(false)
   const [isSubscribed] = useState(true)
   const [autoMode, setAutoMode] = useState(true)
@@ -113,6 +114,21 @@ export default function Home() {
     setAttachmentMenuOpen(false)
   }
 
+  async function toggleVoiceInput() {
+    if (isRecording) {
+      mediaStreamRef.current?.getTracks().forEach((track) => track.stop())
+      mediaStreamRef.current = null
+      setIsRecording(false)
+      return
+    }
+    try {
+      mediaStreamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true })
+      setIsRecording(true)
+    } catch {
+      setIsRecording(false)
+    }
+  }
+
   function sendMessage() {
     const text = input.trim()
     if ((!text && !attachment) || isTyping) return
@@ -133,7 +149,7 @@ export default function Home() {
     <div className="ambient ambient-one" /><div className="ambient ambient-two" />
     <aside className={`sidebar ${drawerOpen ? 'sidebar-open' : ''}`}>
       <div className="sidebar-inner">
-        <div className="brand-row"><div className="brand-mark"><Sparkles size={17} /></div><span>ZEXIO<span className="brand-muted">AI</span></span><button className="mobile-close" onClick={() => setDrawerOpen(false)} aria-label="Close navigation"><X size={18} /></button></div>
+        <div className="brand-row"><div className="brand-mark"><Sparkles size={17} /></div><span>Zexio AI</span><button className="mobile-close" onClick={() => setDrawerOpen(false)} aria-label="Close navigation"><X size={18} /></button></div>
         <button className="new-chat" onClick={newChat}><Plus size={17} /> New chat <span className="shortcut">⌘ K</span></button>
         <label className="search-box"><Search size={15} /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search conversations" /><span>⌘ /</span></label>
         <div className="section-label recent-label">Recent <span><MoreHorizontal size={16} /></span></div>
@@ -162,10 +178,10 @@ export default function Home() {
           </div>
         </>}
         {attachment && <div className="attachment-preview">{attachment.url ? <img src={attachment.url} alt="Selected attachment" /> : <FileText size={15} />}<span>{attachment.name}</span><button onClick={() => setAttachment(null)} aria-label={`Remove ${attachment.name}`}><X size={14} /></button></div>}
-        <input ref={cameraInputRef} className="sr-only" type="file" accept="image/*" capture="environment" onChange={(event) => handleFile(event.target.files?.[0])} />
+        <input ref={cameraInputRef} className="sr-only" hidden type="file" accept="image/*" capture="environment" onChange={(event) => handleFile(event.target.files?.[0])} />
         <div className="composer">
           <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing && e.keyCode !== 229) { e.preventDefault(); sendMessage() } }} placeholder="Ask Zexio AI…" rows={1} />
-          <div className="composer-footer"><button className={`attach-btn ${attachmentMenuOpen ? 'composer-control-active' : ''}`} onClick={() => setAttachmentMenuOpen((open) => !open)} aria-label="Add attachment"><Plus size={18} /></button><input ref={fileInputRef} className="sr-only" type="file" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt,.csv,.xls,.xlsx,.ppt,.pptx" onChange={(event) => handleFile(event.target.files?.[0])} /><div className="composer-tools"><button className={isRecording ? 'composer-control-active' : ''} onClick={() => setIsRecording((recording) => !recording)} aria-label={isRecording ? 'Stop voice input' : 'Start voice input'}><AudioLines size={18} /></button><button className={`send-btn ${input.trim() || attachment ? 'send-active' : ''}`} onClick={sendMessage} disabled={!input.trim() && !attachment} aria-label="Send message"><ArrowUp size={18} /></button></div></div>
+          <div className="composer-footer"><button className={`attach-btn ${attachmentMenuOpen ? 'composer-control-active' : ''}`} onClick={() => setAttachmentMenuOpen((open) => !open)} aria-label="Add attachment"><Plus size={18} /></button><input ref={fileInputRef} className="sr-only" hidden type="file" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt,.csv,.xls,.xlsx,.ppt,.pptx" onChange={(event) => handleFile(event.target.files?.[0])} /><div className="composer-tools"><button className={isRecording ? 'composer-control-active' : ''} onClick={toggleVoiceInput} aria-label={isRecording ? 'Stop voice input' : 'Start voice input'}><AudioLines size={18} /></button><button className={`send-btn ${input.trim() || attachment ? 'send-active' : ''}`} onClick={sendMessage} disabled={!input.trim() && !attachment} aria-label="Send message"><ArrowUp size={18} /></button></div></div>
         </div>
         <div className="composer-note"><Zap size={12} /> Zexio AI can make mistakes. Check important information.</div>
       </nav>
